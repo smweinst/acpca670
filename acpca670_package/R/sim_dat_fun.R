@@ -1,8 +1,6 @@
 #' @title Function to simulate data from the AC-PCA paper
 #' @description Code for the simulation function based on AC-PCA paper
 #' @name sim_dat_fun
-#' @importFrom stats rnorm runif sd
-#' @importFrom MASS mvrnorm
 #' @param n the number of subjects; default is 5
 #' @param b the number of brain regions; default is 10
 #' @param p the number of features per brain region; default is 400
@@ -61,9 +59,9 @@ sim_dat_fun = function(n=5,b=10,p=400,alpha=2.5){
   # defing the confounder matrix, Y
   # this loop is taken from R code provided by AC-PCA author
   Y <- c()
-  for (k in 1:b){
-    for (i in 1:(n-1)){
-      for (j in (i+1):n){
+  for (k in 1:b){ # region
+    for (i in 1:(n-1)){ # subject
+      for (j in (i+1):n){ #
         tmp <- rep(0, n*b)
         tmp[(i-1)*b+k] <- 1
         tmp[(j-1)*b+k] <- -1

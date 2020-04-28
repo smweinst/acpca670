@@ -1,19 +1,13 @@
 #' @title Function to simulate data and compare different methods
 #' @description Data will be simulated using sim_dat_fun function and then we will compare performance of ComBat, SVA, and acPCA, just like in the AC-PCA paper
 #' @name sim_compare_fun
-#' @importFrom acPCA acPCAtuneLambda acPCA
-#' @importFrom sva sva fsva ComBat
-#' @importFrom vioplot vioplot
-#' @importFrom stats model.matrix cor prcomp
-#' @importFrom graphics abline par title mtext
 #' @param n the number of subjects; default is 5
 #' @param b the number of brain regions; default is 10
 #' @param p the number of features per brain region; default is 400
 #' @param alpha the constant that is multiplied by the confounder; default is 2.5
 #' @param nsim number of simulations to run; default is 100
-#' @param plot indicating whether to plot results comparison; default is TRUE
 #' @export
-sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100,plot=TRUE){
+sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100){
   # initialize empty matrices to store correlations:
   pca.combat.scores.cor = pca.combat.loadings.cor = acpca.scores.cor = acpca.loadings.cor = pca.sva.scores.cor = pca.sva.loadings.cor = matrix(nrow=nsim,ncol=2)
   for (s in 1:nsim){
@@ -24,7 +18,7 @@ sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100,plot=TRUE){
     labels = sim_dat.s$labels
     group = sim_dat.s$group
     Y = sim_dat.s$Y
-    Gamma.mat.s = sim_dat.s$Gamma.mat
+    # Gamma.mat.s = sim_dat.s$Gamma.mat
 
     # regular pca on the shared component:
     pca_omega = prcomp(omega.s.shared, center = T)

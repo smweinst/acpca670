@@ -4,7 +4,7 @@
 \alias{sim_compare_fun}
 \title{Function to simulate data and compare different methods}
 \usage{
-sim_compare_fun(n = 5, b = 10, p = 400, alpha = 2.5, nsim = 100, plot = TRUE)
+sim_compare_fun(n = 5, b = 10, p = 400, alpha = 2.5, nsim = 100)
 }
 \arguments{
 \item{n}{the number of subjects; default is 5}
@@ -16,8 +16,6 @@ sim_compare_fun(n = 5, b = 10, p = 400, alpha = 2.5, nsim = 100, plot = TRUE)
 \item{alpha}{the constant that is multiplied by the confounder; default is 2.5}
 
 \item{nsim}{number of simulations to run; default is 100}
-
-\item{plot}{indicating whether to plot results comparison; default is TRUE}
 }
 \description{
 Data will be simulated using sim_dat_fun function and then we will compare performance of ComBat, SVA, and acPCA, just like in the AC-PCA paper
