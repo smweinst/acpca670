@@ -1,0 +1,14 @@
+# install ACPCA R package from github
+install.packages("acPCA_1.2.tar.gz", repos = NULL, type="source")
+
+#library(acPCA)
+
+# install sva package (needed )
+install.packages("BiocManager")
+BiocManager::install("sva")
+#library(sva)
+
+# package for making violin plots
+install.packages("vioplot")
+
+#install.packages("RSpectra")

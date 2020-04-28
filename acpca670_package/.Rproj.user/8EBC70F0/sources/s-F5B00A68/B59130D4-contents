@@ -1,0 +1,260 @@
+# simulation setting 1:
+
+# need these packages installed:
+# library(acPCA)
+# library(sva)
+# library(MASS)
+# library(vioplot)
+
+# # function to simulate data per 2016 ACPCA paper:
+# sim_dat_fun = function(n=5,b=10,p=400,alpha=2.5){
+#   mu = 1:b
+#   w1 = (mu-mean(mu))/sd(mu)
+#
+#   sigma_mat = matrix(nrow=b,ncol=b)
+#
+#   for (i in 1:b){
+#     for (j in 1:b){
+#       sigma_mat[i,j] = exp(-((w1[i] - w1[j])^2)/4)
+#     }
+#   }
+#
+#   w2 = MASS::mvrnorm(1,mu=rep(0,b),Sigma = 0.25*sigma_mat)
+#   W = cbind(w1,w2)
+#
+#   # h is a 2 x p matrix whose rows are N(0,I_p)
+#   h = MASS::mvrnorm(2,mu=rep(0,p),Sigma = diag(1,p))
+#   Omega = W%*%h # dim: b x p
+#
+#   # donor-specific componenent Gamma:
+#   ## G.i = L1.i + L2.i
+#   ### L1.i = 1r.i, 1 is vector of 1's, r.i is N(0,I_p)
+#
+#   # alpha = 2.5
+#
+#   X.mat = matrix(nrow=0, ncol = p)
+#   Gamma.mat = matrix(nrow=0,ncol=p)
+#   for (i in 1:n){
+#     r.i = matrix(rnorm(p,0,1),nrow = 1, ncol = p)
+#     L1.i = matrix(rep(1,b),nrow=b) %*% r.i
+#
+#     B.i = sample(c(rep(1,3), rep(0,b-3))) # B.i has 3 entries that are Uniform(0,2) and the rest are set to 0
+#     B.i[B.i==1] = runif(3,min=0,max=2) # sample from U(0,2) for the non-zero elements of B.i
+#     s.i = matrix(rnorm(p,0,1),nrow = 1, ncol = p)
+#     L2.i = B.i%*%s.i
+#
+#     G.i = L1.i + L2.i
+#
+#     X.i = Omega + alpha*G.i + rnorm(n=1,mean=0,sd=sqrt(0.25)) # epsilon (subject-level random noise)
+#
+#     X.mat = rbind(X.mat,X.i)
+#     Gamma.mat = rbind(Gamma.mat,G.i)
+#   }
+#
+#   labels = rep(1:b,n) # labels for each brain region (10 per person)
+#
+#   group = rep(1:n,b)
+#   group = sort(group) # labels for each brain (i.e., each subject)
+#
+#   # from simulation code provided by AC-PCA author
+#   Y <- c()
+#   for (k in 1:b){
+#     for (i in 1:(n-1)){
+#       for (j in (i+1):n){
+#         tmp <- rep(0, n*b)
+#         tmp[(i-1)*b+k] <- 1
+#         tmp[(j-1)*b+k] <- -1
+#         Y <- cbind(Y, as.matrix(tmp))
+#       }
+#     }
+#   }
+#   # Y = matrix(nrow=n*b,ncol = n)
+#   # Y[,1] = c(rep(1-1/n, b),rep(-(1/n),n*b-b))
+#   # Y[,2] = c(rep(-(1/n),b),rep(1-1/n, b),rep(-1/n, n*b-2*b))
+#   # Y[,3] = c(rep(-(1/n),2*b),rep(1-1/n, b),rep(-1/n, n*b-3*b))
+#   # Y[,4] = c(rep(-(1/n),3*b),rep(1-1/n, b),rep(-1/n, n*b-4*b))
+#   # Y[,5] = c(rep(-(1/n),4*b),rep(1-1/n, b),rep(-1/n, n*b-5*b))
+#
+#   return(list(X.mat = X.mat,
+#               Gamma.mat=Gamma.mat,
+#               Y=Y,
+#               Omega = Omega,
+#               labels = labels,
+#               group=group))
+# }
+
+par(mfrow=c(1,5),cex.main = 1,cex=1,mar = c(4,4,4,4),cex.axis=1)
+# visualize results from one simulated dataset:
+set.seed(10)
+simdat = sim_dat_fun(n=5)
+
+# PCs associated with the true pattern:
+pca_truth = prcomp(simdat$Omega, center = T)
+plot(pca_truth$x[,1],pca_truth$x[,2],type = "n", xlab = "PC 1", ylab = "PC 2",main = "True Pattern")
+text(pca_truth$x[,1],pca_truth$x[,2],labels = simdat$labels)
+
+# regular PCA:
+reg_pca = prcomp(simdat$X.mat)
+plot(reg_pca$x[,1],reg_pca$x[,2],type = "n", xlab = "PC 1", ylab = "PC 2",main = "PCA")
+text(reg_pca$x[,1],reg_pca$x[,2],labels = simdat$labels,col = simdat$group+1)
+
+# combat:
+mod_combat = model.matrix(~factor(simdat$labels))
+combat.X = sva::ComBat(t(simdat$X.mat),batch = simdat$group,mod = mod_combat) # transpose because sva package expects features in rows
+# apply pca after combat:
+pca.combat = prcomp(t(combat.X),center = T)
+plot(pca.combat$x[,1],pca.combat$x[,2],type = "n",main = "ComBat",
+     xlab = "PC1",ylab = "PC2")
+text(pca.combat$x[,1],pca.combat$x[,2],labels = simdat$labels,col = simdat$group+1)
+
+# sva:
+sva_mod = model.matrix(~factor(simdat$labels))
+sva.X = sva::sva(t(simdat$X.mat), mod = sva.mod) # transpose because sva package expects features in rows
+fsva.X = sva::fsva(t(X.mat.s), sv = sva.X,mod = sva.mod,
+                     newdat = t(simdat$X.mat))
+
+pca.sva = prcomp(t(fsva.X$db),center = T) # transpose again to get back to features in columns instead of rows
+plot(pca.sva$x[,1],pca.sva$x[,2],type = "n",main = "SVA",xlab = "PC1",ylab = "PC2")
+text(pca.sva$x[,1],pca.sva$x[,2],labels = simdat$labels,col = simdat$group+1)
+
+# ac-pca:
+acpca.tune = acPCA::acPCAtuneLambda(X = simdat$X.mat,
+                                      Y = simdat$Y,
+                                      nPC = 2,
+                                      lambdas = seq(0,10,0.05),
+                                      anov=T, kernel = "linear",quiet = T)
+
+acpca.X = acPCA::acPCA(X = simdat$X.mat, Y = simdat$Y,
+                       lambda = acpca.tune$best_lambda,#acpca.s.tune$best_lambda,
+                       kernel = "linear", nPC = 2)
+plot(acpca.X$Xv[,1],acpca.X$Xv[,2],type = "n",main = "ACPCA",xlab = "PC1",ylab = "PC2")
+text(acpca.X$Xv[,1],acpca.X$Xv[,2], labels = simdat$labels,col = simdat$group+1)
+
+set.seed(10)
+nsim = 100
+n=5
+b=10
+# initialize empty matrices to store correlations:
+pca.combat.scores.cor = pca.combat.loadings.cor = acpca.scores.cor = acpca.loadings.cor = pca.sva.scores.cor = pca.sva.loadings.cor = matrix(nrow=nsim,ncol=2)
+acpca.loadings.cor.gamma = acpca.scores.cor.gamma = matrix(nrow=nsim,ncol=2)
+for (s in 1:nsim){
+  sim_dat_list = sim_dat_fun()
+  X.mat.s = sim_dat_list$X.mat
+  omega.s = sim_dat_list$Omega
+  omega.s.shared = do.call("rbind",replicate(n,omega.s,simplify = F))
+  labels = sim_dat_list$labels
+  group = sim_dat_list$group
+  Y = sim_dat_list$Y
+  Gamma.mat.s = sim_dat_list$Gamma.mat
+
+  # pca on the shared component:
+  pca_omega = prcomp(omega.s.shared, center = T)
+  pca_omega.scores = pca_omega$x
+  pca_omega.loadings = pca_omega$rotation
+
+  # pca on the confounder:
+  pca_gamma = prcomp(Gamma.mat.s,center = T)
+  pca_gamma.scores = pca_gamma$x
+  pca_gamma.loadings = pca_gamma$rotation
+
+  # ComBat:
+  mod.combat =model.matrix(~factor(labels))
+  combat.X.s = sva::ComBat(t(X.mat.s),batch = group, mod = mod.combat) # transpose because sva package expects features in rows
+  # apply pca after combat:
+  pca.combat.s = prcomp(t(combat.X.s),center = T)
+  pca.combat.scores.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(pca.combat.s$x[,t],pca_omega.scores[,t],method = "pearson")
+  })
+  pca.combat.loadings.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(pca.combat.s$rotation[,t],pca_omega.loadings[,t], method = "spearman")
+  })
+
+  # SVA:
+  sva.mod = model.matrix(~factor(labels))
+  sva.X.s = sva::sva(t(X.mat.s), mod = sva.mod) # transpose because sva package expects features in rows
+  sv = sva.X.s$sv
+  fsva.X.s = sva::fsva(t(X.mat.s), sv = sva.X.s,mod = sva.mod,
+                       newdat = t(X.mat.s))
+
+  pca.sva.s = prcomp(t(fsva.X.s$db),center = T) # transpose again to get back to features in columns instead of rows
+
+  pca.sva.scores.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(pca.sva.s$x[,t],pca_omega.scores[,t],method = "pearson")
+  })
+
+  pca.sva.loadings.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(pca.sva.s$rotation[,t],pca_omega.loadings[,t],method = "pearson")
+  })
+
+  # acpca:
+  #X.mat.s = scale(X.mat.s,center = TRUE, scale = F)
+  acpca.s.tune = acPCA::acPCAtuneLambda(X = X.mat.s,
+                                        Y = Y,
+                                        nPC = 2,
+                                        lambdas = seq(0,10,0.05),
+                                        anov=T, kernel = "linear",quiet = T)
+
+  acpca.s = acPCA::acPCA(X = X.mat.s, Y = Y,
+                         lambda = acpca.s.tune$best_lambda,
+                         kernel = "linear", nPC = 2)
+
+  acpca.scores.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(acpca.s$Xv[,t],pca_omega.scores[,t],method = "pearson")
+  })
+
+  acpca.loadings.cor[s,] = sapply(1:2, FUN = function(t){
+    cor(acpca.s$v[,t], pca_omega.loadings[,t],method = "spearman")
+  })
+
+  acpca.scores.cor.gamma[s,] = sapply(1:2, FUN = function(t){
+    cor(acpca.s$Xv[,t],pca_gamma.scores[,t],method = "pearson")
+  })
+
+  acpca.loadings.cor.gamma[s,] = sapply(1:2, FUN = function(t){
+    cor(acpca.s$v[,t], pca_gamma.loadings[,t],method = "spearman")
+  })
+
+}
+
+# pca on the confounder:
+
+
+par(mfrow=c(1,1),mar=c(5,5,5,5),cex.axis=1,cex.main=1.5)
+# combat:
+vioplot::vioplot(
+  # combat:
+  abs(pca.combat.scores.cor[,1]),abs(pca.combat.loadings.cor[,1]),abs(pca.combat.scores.cor[,2]),abs(pca.combat.loadings.cor[,2]),
+
+  # sva:
+  abs(pca.sva.scores.cor[,1]),abs(pca.sva.loadings.cor[,1]), abs(pca.sva.scores.cor[,2]),abs(pca.sva.loadings.cor[,2]),
+
+  # acpca:
+  abs(acpca.scores.cor[,1]),abs(acpca.loadings.cor[,1]),abs(acpca.scores.cor[,2]),abs(acpca.loadings.cor[,2]),
+  ylim = c(0,1),main = "",col = "white",names= rep(c("\n PC1","PC1 \n loading","PC2", "PC2 \n loading"),3),cex.axis=1)
+
+abline(v=c(4.5,8.5),lty=2)
+title("ComBat",line = 1,adj = 0.15)
+title("SVA",line = 1,adj = 0.5)
+title("AC-PCA",line = 1,adj = 0.85)
+
+# correlation with confounder:
+vioplot::vioplot(abs(acpca.scores.cor.gamma[,1]),
+                 abs(acpca.scores.cor.gamma[,2]),
+                 abs(acpca.loadings.cor.gamma[,1]),
+                 abs(acpca.loadings.cor.gamma[,2]),
+                 names = c("\n PC1","PC1 \n loading","PC2", "PC2 \n loading"),
+                 col = "white",ylim = c(0,1),main = "AC-PCA correlation with Gamma (subject-level component)")
+
+# # data example 1
+X = data_example1$X
+Y = data_example1$Y
+result_tune <- acPCAtuneLambda(X=X,Y=Y,nPC=2,lambdas=seq(0,10,0.05),
+                               anov=T,kernel="linear",quiet = T)
+result <- acPCA(X=X,Y=Y,lambda=result_tune$best_lambda,
+                kernel = "linear",nPC=2)
+plot(result$Xv[,1],-result$Xv[,2],xlab = "PC 1", ylab = "PC 2",
+     type = "n", main = "AC-PCA")
+text(result$Xv[,1],-result$Xv[,2],
+     labels = data_example1$lab, col = data_example1$group+1)
+
+# ex1_truepattern_pca = prcomp(data_example1$true_pattern, center = T)

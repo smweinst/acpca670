@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+export(sim_dat_fun)
+importFrom("stats", "rnorm", "runif", "sd","prcomp")
+importFrom("MASS","mvrnorm")
