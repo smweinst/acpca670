@@ -6,7 +6,7 @@ Author: Sarah Weinstein
 Maintainer: Sarah Weinstein <sarah.margaret.weinstein@gmail.com>
 Description: This is an R package for my final project for BSTA 670. This package allows the user to replicate simulations from the AC-PCA paper published by Lin et al. (2016), and also includes some extensions of the AC-PCA paper.
 Depends:
-  R (>= 2.10), MASS, acPCA, sva, vioplot
+  R (>= 2.10)
 biocViews:
 Imports:
 	sva,
