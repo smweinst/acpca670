@@ -50,7 +50,7 @@ sim_apply_new_sample = function(n=5,b=10,p=400,alpha_orig=2.5,alpha_new=2.5,nsim
     vioplot::vioplot(abs(scores.cor.omega.new[,1]),abs(scores.cor.omega.new[,2]),
                      ylim = c(0,1), ylab = c("Pearson correlation"),
                      col = "white", names = c("PC1","PC2"),
-                     main = "Correlation with PC scores of shared component using AC-PCA loadings from a different sample");mtext(
+                     main = "Correlation with shared component when AC-PCA from another sample is used");mtext(
                        bquote(paste(alpha['original']," = ",.(alpha_orig), "   ", alpha['new'], " = ", .(alpha_new))),side = 3
                        )
   }
