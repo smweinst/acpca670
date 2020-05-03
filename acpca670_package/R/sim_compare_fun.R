@@ -27,7 +27,7 @@ sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100){
 
     # ComBat:
     mod.combat =model.matrix(~factor(labels))
-    combat.X.s = ddpcr::quiet(sva::ComBat(t(X.mat.s),batch = group, mod = mod.combat)) # transpose because sva package expects features in rows
+    combat.X.s = sva::ComBat(t(X.mat.s),batch = group, mod = mod.combat) # transpose because sva package expects features in rows
     # apply pca after combat:
     pca.combat.s = prcomp(t(combat.X.s),center = T)
     pca.combat.scores.cor[s,] = sapply(1:2, FUN = function(t){
