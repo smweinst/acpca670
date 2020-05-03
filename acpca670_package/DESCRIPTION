@@ -12,7 +12,8 @@ Imports:
 	sva,
 	acPCA,
 	vioplot,
-	MASS
+	MASS,
+	ddpcr
 Remotes: github::linzx06/AC-PCA/R_package/acPCA
 License: GPL-2
 Encoding: UTF-8
