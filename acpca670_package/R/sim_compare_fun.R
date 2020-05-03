@@ -97,11 +97,11 @@ sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100){
     text(pca.sva.s$x[,1],pca.sva.s$x[,2],labels = labels,col = group+1)
 
     # acpca:
-    plot(acpca.s$Xv[,1],acpca.s$Xv[,2],type = "n",main = "ACPCA",xlab = "PC1",ylab = "PC2")
+    plot(acpca.s$Xv[,1],acpca.s$Xv[,2],type = "n",main = "AC-PCA",xlab = "PC1",ylab = "PC2")
     text(acpca.s$Xv[,1],acpca.s$Xv[,2], labels = labels,col = group+1)
 
   } else {
-    par(mfrow=c(1,1),mar=c(5,5,5,5),cex.axis=1,cex.main=1.5)
+    par(mfrow=c(1,1))
     # combat:
     vioplot::vioplot(
       # combat:
