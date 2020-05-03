@@ -13,7 +13,7 @@ Imports:
 	acPCA,
 	vioplot,
 	MASS
-Remotes: GitHub::linzx06/AC-PCA/R_package/acPCA
+Remotes: GitHub::linzx06/AC-PCA/R_package/acPCA_1.2.tar.gz
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
