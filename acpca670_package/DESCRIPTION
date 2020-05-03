@@ -1,6 +1,6 @@
 Package: acpca670
 Type: Package
-Title: ACPCA670 R package
+Title: acpca670 R package
 Version: 0.1.0
 Author: Sarah Weinstein
 Maintainer: Sarah Weinstein <sarah.margaret.weinstein@gmail.com>
