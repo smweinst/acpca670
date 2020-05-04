@@ -11,6 +11,7 @@ biocViews:
 Imports:
 	sva,
 	acPCA,
+	RSpectra,
 	vioplot,
 	MASS
 Remotes: github::linzx06/AC-PCA/R_package/acPCA
