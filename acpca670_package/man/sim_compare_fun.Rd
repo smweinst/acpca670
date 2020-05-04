@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim_compare_fun.R
 \name{sim_compare_fun}
 \alias{sim_compare_fun}
-\title{Function to simulate data and compare different methods}
+\title{Function to simulate data in the same way as in the 2016 AC-PCA paper and compare different methods (PCA, ComBat, SVA, AC-PCA)}
 \usage{
 sim_compare_fun(n = 5, b = 10, p = 400, alpha = 2.5, nsim = 100)
 }
