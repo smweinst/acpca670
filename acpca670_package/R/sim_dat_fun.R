@@ -30,8 +30,6 @@ sim_dat_fun = function(n=5,b=10,p=400,alpha=2.5){
   ## G.i = L1.i + L2.i
   ### L1.i = 1r.i, 1 is vector of 1's, r.i is N(0,I_p)
 
-  # alpha = 2.5
-
   X.mat = matrix(nrow=0, ncol = p)
   Gamma.mat = matrix(nrow=0,ncol=p)
   for (i in 1:n){
@@ -57,7 +55,7 @@ sim_dat_fun = function(n=5,b=10,p=400,alpha=2.5){
   group = sort(group) # labels for each brain (i.e., each subject)
 
   # defing the confounder matrix, Y
-  # this loop is taken from R code provided by AC-PCA author
+  # this definition for Y is taken from code provided by author of AC-PCA paper
   Y <- c()
   for (k in 1:b){ # region
     for (i in 1:(n-1)){ # subject
@@ -70,6 +68,7 @@ sim_dat_fun = function(n=5,b=10,p=400,alpha=2.5){
     }
   }
 
+  # return a list with each part of the simulated data
   return(list(X.mat = X.mat,
               Gamma.mat=Gamma.mat,
               Y=Y,

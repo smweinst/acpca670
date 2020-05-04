@@ -37,7 +37,7 @@ sim_apply_new_sample = function(n=5,b=10,p=400,alpha_orig=2.5,alpha_new=2.5,nsim
     omega.s.new = sim_dat.s.new$Omega
     omega.s.new.shared = do.call("rbind",replicate(n,omega.s.new,simplify = F))
 
-    # pca on omega in new data:
+    # pca on omega in new data (the PCs of Omega are what we want the AC-PCA projections in the new data to be highly correlated with):
     pca_omega.new.scores = prcomp(omega.s.new.shared, center = T)$x
 
     scores.cor.omega.new[s,] = sapply(1:2, FUN = function(t){
@@ -45,7 +45,7 @@ sim_apply_new_sample = function(n=5,b=10,p=400,alpha_orig=2.5,alpha_new=2.5,nsim
     })
 
   }
-  if (nsim > 1){
+  if (nsim > 1){ # how data will be visualized if multiple simulations are run
     par(mfrow=c(1,1))
     vioplot::vioplot(abs(scores.cor.omega.new[,1]),abs(scores.cor.omega.new[,2]),
                      ylim = c(0,1), ylab = c("Pearson correlation"),
@@ -54,7 +54,7 @@ sim_apply_new_sample = function(n=5,b=10,p=400,alpha_orig=2.5,alpha_new=2.5,nsim
                        bquote(paste(alpha['original']," = ",.(alpha_orig), "   ", alpha['new'], " = ", .(alpha_new))),side = 3
                        )
   }
-  else{
+  else{ # how data will be visualized if only one simulation is specified
     par(mfrow=c(1,2))
     plot(pca_omega.new.scores[,1],pca_omega.new.scores[,2], main = "True Pattern",
          xlab = "PC1", ylab = "PC2",type = 'n');text(
