@@ -43,8 +43,8 @@ sim_apply_new_sample = function(n=5,b=10,p=400,alpha_orig=2.5,alpha_new=2.5,nsim
     scores.cor.omega.new[s,] = sapply(1:2, FUN = function(t){
       cor(Xv.newsamp[,t], pca_omega.new.scores[,t],method = "pearson") # correlation between scores
     })
-
   }
+
   if (nsim > 1){ # how data will be visualized if multiple simulations are run
     par(mfrow=c(1,1))
     vioplot::vioplot(abs(scores.cor.omega.new[,1]),abs(scores.cor.omega.new[,2]),

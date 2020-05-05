@@ -25,7 +25,7 @@ sim_compare_fun = function(n=5,b=10,p=400,alpha=2.5,nsim = 100){
     pca_omega.loadings = pca_omega$rotation # loadings
 
     # ComBat:
-    mod.combat =model.matrix(~factor(labels))
+    mod.combat = model.matrix(~factor(labels))
     combat.X.s = sva::ComBat(t(X.mat.s),batch = group, mod = mod.combat) # transpose because sva package expects features in rows
     # apply pca after combat:
     pca.combat.s = prcomp(t(combat.X.s),center = T)
